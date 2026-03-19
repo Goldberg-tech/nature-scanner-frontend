@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════════════════════
 //  CONFIG — замени на свой URL Railway бэкенда
 // ══════════════════════════════════════════════════════════════
-const API = 'nature-scanner-backend-production.up.railway.app';
+const API = 'https://nature-scanner-backend-production.up.railway.app';
 
 // ══════════════════════════════════════════════════════════════
 //  РЕЖИМЫ
