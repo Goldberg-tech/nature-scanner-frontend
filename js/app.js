@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════
-//  CONFIG — замени на свой URL Railway бэкенда
+//  CONFIG
 // ══════════════════════════════════════════════════════════════
 const API = 'https://nature-scanner-backend-production.up.railway.app';
 
@@ -69,13 +69,26 @@ window.addEventListener("DOMContentLoaded", () => {
 // ══════════════════════════════════════════════════════════════
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
+  const screen = document.getElementById('screen-' + name);
+  if (screen) {
+    screen.classList.add('active');
+    const scrollArea = screen.querySelector('.scroll-area');
+    if (scrollArea) scrollArea.scrollTop = 0;
+  }
 }
 
 function selectMode(mode) {
   currentMode = mode;
-  const m = MODES[mode];
-  document.getElementById('camera-title').textContent    = m.label;
+  resetCamera();
+  showScreen('camera');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CAMERA RESET
+// ══════════════════════════════════════════════════════════════
+function resetCamera() {
+  const m = MODES[currentMode];
+  document.getElementById('camera-title').textContent     = m.label;
   document.getElementById('camera-hint-text').textContent = m.hint;
   document.getElementById('tip-card').innerHTML = `<div class="tip-text">${m.tip}</div>`;
   document.getElementById('camera-preview').innerHTML = `
@@ -88,7 +101,6 @@ function selectMode(mode) {
       <span class="camera-hint">Нажми чтобы открыть камеру</span>
     </div>`;
   document.getElementById('photo-input').value = '';
-  showScreen('camera');
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -129,6 +141,11 @@ async function scanPhoto(file) {
       return;
     }
 
+    if (data.result && data.result.wrong_category) {
+      showError('Не та категория', data.result.wrong_category);
+      return;
+    }
+
     renderResult(data.mode, data.result);
     showScreen('result');
 
@@ -152,100 +169,135 @@ function fileToBase64(file) {
 function renderResult(mode, r) {
   let html = '';
 
-  // Предупреждение если есть
+  // Предупреждение
   if (r.warning) {
-    html += `<div class="warning-card">⚠️ ${r.warning}</div>`;
+    html += `
+      <div class="warning-card">
+        <div class="warning-icon">⚠️</div>
+        <div class="warning-text">${r.warning}</div>
+      </div>`;
   }
 
   // Основная карточка
   html += `<div class="result-card">`;
+  html += `<div class="result-label">Определено</div>`;
   html += `<div class="result-name">${r.name}</div>`;
   if (r.latin) {
     html += `<div class="result-latin">${r.latin}</div>`;
   }
 
-  // Статус по режиму
   if (mode === 'mushroom') {
-    const edibleClass = getEdibleClass(r.edible);
-    html += `<div class="result-badge ${edibleClass}">${r.edible}</div>`;
+    const cls = getEdibleClass(r.edible);
+    html += `<div class="result-badge ${cls}">${edibleEmoji(r.edible)} ${r.edible}</div>`;
   } else if (mode === 'plant') {
-    html += `<div class="result-badge ${r.safe ? 'badge-safe' : 'badge-danger'}">${r.type}</div>`;
+    html += `<div class="result-badge ${r.safe ? 'badge-safe' : 'badge-danger'}">${r.safe ? '✅' : '⚠️'} ${r.type}</div>`;
   } else if (mode === 'weed') {
     html += `<div class="result-badge ${getDangerClass(r.danger)}">Опасность: ${r.danger}</div>`;
   } else if (mode === 'disease') {
     html += `<div class="result-badge ${getSeverityClass(r.severity)}">${r.type} · ${r.severity}</div>`;
   }
 
-  // Уверенность
-  html += `<div class="result-confidence">Уверенность определения: ${r.confidence}</div>`;
+  html += `<div class="result-confidence">
+    <span class="confidence-dot ${getConfidenceDot(r.confidence)}"></span>
+    Уверенность: <strong>${r.confidence}</strong>
+  </div>`;
+
   html += `</div>`;
 
   // Описание
-  html += `<div class="info-card">
-    <div class="info-title">Описание</div>
-    <div class="info-text">${r.description}</div>
-  </div>`;
-
-  // Дополнительное поле по режиму
-  if (mode === 'weed' && r.removal) {
-    html += `<div class="info-card">
-      <div class="info-title">Как избавиться</div>
-      <div class="info-text">${r.removal}</div>
+  html += `
+    <div class="info-card">
+      <div class="info-title">📋 Описание</div>
+      <div class="info-text">${r.description}</div>
     </div>`;
+
+  // Доп поля
+  if (mode === 'weed' && r.removal) {
+    html += `
+      <div class="info-card">
+        <div class="info-title">🌿 Как избавиться</div>
+        <div class="info-text">${r.removal}</div>
+      </div>`;
   }
   if (mode === 'disease' && r.treatment) {
-    html += `<div class="info-card">
-      <div class="info-title">Лечение</div>
-      <div class="info-text">${r.treatment}</div>
-    </div>`;
+    html += `
+      <div class="info-card">
+        <div class="info-title">💊 Лечение</div>
+        <div class="info-text">${r.treatment}</div>
+      </div>`;
   }
 
   // Признаки
   if (r.signs && r.signs.length) {
-    html += `<div class="info-card">
-      <div class="info-title">${mode === 'disease' ? 'Симптомы' : 'Отличительные признаки'}</div>
-      <ul class="signs-list">
-        ${r.signs.map(s => `<li>${s}</li>`).join('')}
-      </ul>
-    </div>`;
+    const title = mode === 'disease' ? '🔍 Симптомы' : '🔍 Отличительные признаки';
+    html += `
+      <div class="info-card">
+        <div class="info-title">${title}</div>
+        <ul class="signs-list">
+          ${r.signs.map(s => `<li>${s}</li>`).join('')}
+        </ul>
+      </div>`;
   }
 
   // Кнопки
-  html += `<div class="result-actions">
-    <button class="primary-btn" onclick="showScreen('camera')">Ещё одно фото</button>
-    <button class="secondary-btn" onclick="showScreen('home')">Другой режим</button>
-  </div>`;
+  html += `
+    <div class="result-actions">
+      <button class="primary-btn" onclick="retryPhoto()">📷 Ещё одно фото</button>
+      <button class="secondary-btn" onclick="showScreen('home')">Другой режим</button>
+    </div>`;
 
-  // Дисклеймер
   html += `<div class="disclaimer">Результат носит информационный характер. При сомнениях не употребляйте в пищу.</div>`;
 
   document.getElementById('result-content').innerHTML = html;
 }
 
 // ══════════════════════════════════════════════════════════════
+//  RETRY
+// ══════════════════════════════════════════════════════════════
+function retryPhoto() {
+  resetCamera();
+  showScreen('camera');
+}
+
+// ══════════════════════════════════════════════════════════════
 //  HELPERS
 // ══════════════════════════════════════════════════════════════
 function getEdibleClass(edible) {
-  if (edible === 'съедобный')              return 'badge-safe';
-  if (edible === 'условно съедобный')      return 'badge-warning';
-  if (edible === 'несъедобный')            return 'badge-danger';
-  if (edible === 'ядовитый')              return 'badge-danger';
-  if (edible === 'смертельно ядовитый')   return 'badge-deadly';
+  if (edible === 'съедобный')            return 'badge-safe';
+  if (edible === 'условно съедобный')    return 'badge-warning';
+  if (edible === 'несъедобный')          return 'badge-danger';
+  if (edible === 'ядовитый')             return 'badge-danger';
+  if (edible === 'смертельно ядовитый')  return 'badge-deadly';
   return 'badge-warning';
 }
 
+function edibleEmoji(edible) {
+  if (edible === 'съедобный')            return '✅';
+  if (edible === 'условно съедобный')    return '⚠️';
+  if (edible === 'несъедобный')          return '❌';
+  if (edible === 'ядовитый')             return '☠️';
+  if (edible === 'смертельно ядовитый')  return '💀';
+  return '❓';
+}
+
 function getDangerClass(danger) {
-  if (danger === 'низкая')   return 'badge-safe';
-  if (danger === 'средняя')  return 'badge-warning';
-  if (danger === 'высокая')  return 'badge-danger';
+  if (danger === 'низкая')  return 'badge-safe';
+  if (danger === 'средняя') return 'badge-warning';
+  if (danger === 'высокая') return 'badge-danger';
   return 'badge-warning';
 }
 
 function getSeverityClass(severity) {
-  if (severity === 'лёгкая')   return 'badge-safe';
-  if (severity === 'средняя')  return 'badge-warning';
+  if (severity === 'лёгкая')  return 'badge-safe';
+  if (severity === 'средняя') return 'badge-warning';
   if (severity === 'тяжёлая') return 'badge-danger';
   return 'badge-warning';
+}
+
+function getConfidenceDot(confidence) {
+  if (confidence === 'высокая') return 'dot-green';
+  if (confidence === 'средняя') return 'dot-yellow';
+  return 'dot-red';
 }
 
 function showError(title, text) {
