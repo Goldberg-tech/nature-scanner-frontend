@@ -207,21 +207,24 @@ function renderResult(mode, r, wrongCategory) {
   html += `<div class="result-name">${r.name || '—'}</div>`;
   if (r.latin) html += `<div class="result-latin">${r.latin}</div>`;
 
-  if (mode === 'mushroom') {
-    html += `<div class="result-badge ${getEdibleClass(r.edible)}">${edibleEmoji(r.edible)} ${r.edible}</div>`;
-  } else if (mode === 'plant' || mode === 'tree') {
-    html += `<div class="result-badge ${r.safe ? 'badge-safe' : 'badge-danger'}">${r.safe ? '✅' : '⚠️'} ${r.type || ''}</div>`;
-  } else if (mode === 'berry') {
-    const safe = r.edible === 'съедобная';
-    html += `<div class="result-badge ${safe ? 'badge-safe' : 'badge-danger'}">${safe ? '✅' : '☠️'} ${r.edible}</div>`;
-  } else if (mode === 'weed') {
-    html += `<div class="result-badge ${getDangerClass(r.danger)}">Опасность: ${r.danger}</div>`;
-  } else if (mode === 'disease') {
-    html += `<div class="result-badge ${getSeverityClass(r.severity)}">${r.type} · ${r.severity}</div>`;
-  } else if (mode === 'insect') {
-    html += `<div class="result-badge ${r.dangerous ? 'badge-danger' : 'badge-safe'}">${r.dangerous ? '⚠️ Опасное' : '✅ Безопасное'}</div>`;
-  } else if (mode === 'mystery' && r.category) {
-    html += `<div class="result-badge badge-warning">Категория: ${r.category}</div>`;
+  // Бейдж статуса — только если категория правильная
+  if (!wrongCategory) {
+    if (mode === 'mushroom') {
+      html += `<div class="result-badge ${getEdibleClass(r.edible)}">${edibleEmoji(r.edible)} ${r.edible}</div>`;
+    } else if (mode === 'plant' || mode === 'tree') {
+      html += `<div class="result-badge ${r.safe ? 'badge-safe' : 'badge-danger'}">${r.safe ? '✅' : '⚠️'} ${r.type || ''}</div>`;
+    } else if (mode === 'berry') {
+      const safe = r.edible === 'съедобная';
+      html += `<div class="result-badge ${safe ? 'badge-safe' : 'badge-danger'}">${safe ? '✅' : '☠️'} ${r.edible}</div>`;
+    } else if (mode === 'weed') {
+      html += `<div class="result-badge ${getDangerClass(r.danger)}">Опасность: ${r.danger}</div>`;
+    } else if (mode === 'disease') {
+      html += `<div class="result-badge ${getSeverityClass(r.severity)}">${r.type} · ${r.severity}</div>`;
+    } else if (mode === 'insect') {
+      html += `<div class="result-badge ${r.dangerous ? 'badge-danger' : 'badge-safe'}">${r.dangerous ? '⚠️ Опасное' : '✅ Безопасное'}</div>`;
+    } else if (mode === 'mystery' && r.category) {
+      html += `<div class="result-badge badge-warning">Категория: ${r.category}</div>`;
+    }
   }
 
   if (r.confidence) {
