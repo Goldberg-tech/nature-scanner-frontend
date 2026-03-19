@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Определитель растений</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://bridge.max.ru/mobi-bridge.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══ ЭКРАН 1: ВЫБОР РЕЖИМА ══════════════════════════════════ -->
+  <div id="screen-home" class="screen active">
+    <div class="scroll-area">
+
+      <div class="hero-section">
+        <div class="hero-icon">🌿</div>
+        <h1>ОПРЕДЕЛИТЕЛЬ</h1>
+        <p>Сфотографируй — и узнай что это за секунду</p>
+      </div>
+
+      <div class="modes-grid">
+        <button class="mode-card" onclick="selectMode('mushroom')">
+          <div class="mode-emoji">🍄</div>
+          <div class="mode-name">Гриб</div>
+          <div class="mode-hint">Съедобный или нет?</div>
+        </button>
+        <button class="mode-card" onclick="selectMode('plant')">
+          <div class="mode-emoji">🌱</div>
+          <div class="mode-name">Растение</div>
+          <div class="mode-hint">Что за растение?</div>
+        </button>
+        <button class="mode-card" onclick="selectMode('weed')">
+          <div class="mode-emoji">🌾</div>
+          <div class="mode-name">Сорняк</div>
+          <div class="mode-hint">Как избавиться?</div>
+        </button>
+        <button class="mode-card" onclick="selectMode('disease')">
+          <div class="mode-emoji">🍂</div>
+          <div class="mode-name">Болезнь</div>
+          <div class="mode-hint">Чем болеет?</div>
+        </button>
+      </div>
+
+      <div class="disclaimer">
+        ⚠️ Результаты носят информационный характер. При сомнениях — не употребляйте в пищу.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ ЭКРАН 2: КАМЕРА ════════════════════════════════════════ -->
+  <div id="screen-camera" class="screen">
+    <div class="screen-header">
+      <button class="back-btn" onclick="showScreen('home')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+      </button>
+      <h2 id="camera-title">Гриб</h2>
+    </div>
+    <div class="scroll-area">
+
+      <div class="camera-card" id="camera-card" onclick="document.getElementById('photo-input').click()">
+        <div class="camera-preview" id="camera-preview">
+          <div class="camera-placeholder">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            <span id="camera-hint-text">Сфотографировать гриб</span>
+            <span class="camera-hint">Нажми чтобы открыть камеру</span>
+          </div>
+        </div>
+        <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this)">
+      </div>
+
+      <div class="tip-card" id="tip-card">
+        <!-- подсказка по режиму -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ ЭКРАН 3: ЗАГРУЗКА ══════════════════════════════════════ -->
+  <div id="screen-loading" class="screen">
+    <div class="loading-wrap">
+      <div class="loading-spinner"></div>
+      <div class="loading-text" id="loading-text">Анализируем фото...</div>
+      <div class="loading-sub">Это займёт несколько секунд</div>
+    </div>
+  </div>
+
+  <!-- ══ ЭКРАН 4: РЕЗУЛЬТАТ ══════════════════════════════════════ -->
+  <div id="screen-result" class="screen">
+    <div class="screen-header">
+      <button class="back-btn" onclick="showScreen('home')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+      </button>
+      <h2>Результат</h2>
+    </div>
+    <div class="scroll-area" style="padding-bottom: 40px;">
+      <div id="result-content"></div>
+    </div>
+  </div>
+
+  <!-- ══ ЭКРАН 5: ОШИБКА ════════════════════════════════════════ -->
+  <div id="screen-error" class="screen">
+    <div class="error-wrap">
+      <div class="error-icon">😕</div>
+      <h3 id="error-title">Не удалось определить</h3>
+      <p id="error-text">Попробуй сделать более чёткое фото</p>
+      <button class="primary-btn" onclick="showScreen('camera')" style="margin-top: 24px;">
+        Попробовать снова
+      </button>
+      <button class="secondary-btn" onclick="showScreen('home')" style="margin-top: 12px;">
+        Выбрать другой режим
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ EXIT MODAL ════════════════════════════════════════════ -->
+<div class="exit-modal" id="exitModal">
+  <div class="exit-modal-backdrop" id="exitBackdrop"></div>
+  <div class="exit-modal-sheet">
+    <div class="exit-modal-handle"></div>
+    <div class="exit-modal-title">Выйти из приложения?</div>
+    <div class="exit-modal-sub">Вы уверены что хотите закрыть Определитель?</div>
+    <div class="exit-modal-btns">
+      <button class="exit-btn-cancel"  id="exitCancel">Остаться</button>
+      <button class="exit-btn-confirm" id="exitConfirm">Выйти</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
