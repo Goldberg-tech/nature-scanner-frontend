@@ -1,26 +1,3 @@
-function dbg(msg) {
-  const p = document.getElementById('debug-panel');
-  if (!p) return;
-  const line = document.createElement('div');
-  line.textContent = Date.now() % 100000 + ' ' + msg;
-  p.appendChild(line);
-  p.scrollTop = p.scrollHeight;
-}
-
-// Перехватываем все клики глобально
-document.addEventListener('click', e => {
-  dbg('CLICK tag=' + e.target.tagName + ' id=' + e.target.id + ' class=' + e.target.className);
-}, true); // true = capture phase, раньше всего
-
-// Перехватываем touchstart/touchend
-document.addEventListener('touchstart', e => {
-  dbg('TOUCHSTART tag=' + e.target.tagName + ' class=' + e.target.className.toString().slice(0,30));
-}, { passive: true, capture: true });
-
-document.addEventListener('touchend', e => {
-  dbg('TOUCHEND tag=' + e.target.tagName);
-}, { passive: true, capture: true });
-
 const API = 'https://nature-scanner-backend-production.up.railway.app';
 
 const MODES = {
@@ -55,11 +32,10 @@ document.addEventListener('touchmove', e => {
     e.preventDefault();
     return;
   }
-  const atTop    = scrollArea.scrollTop <= 0;
-  const atBottom = scrollArea.scrollTop + scrollArea.clientHeight >= scrollArea.scrollHeight - 1;
+  const atTop      = scrollArea.scrollTop <= 0;
+  const atBottom   = scrollArea.scrollTop + scrollArea.clientHeight >= scrollArea.scrollHeight - 1;
   const swipingDown = e.touches[0].clientY > touchStartY;
   const swipingUp   = e.touches[0].clientY < touchStartY;
-
   if ((atTop && swipingDown) || (atBottom && swipingUp)) {
     e.preventDefault();
   }
@@ -71,7 +47,6 @@ function showScreen(name) {
   const screen = document.getElementById('screen-' + name);
   if (!screen) return;
   screen.classList.add('active');
-  // сброс touch-состояния при смене экрана
   touchStartY = 0;
   const area = screen.querySelector('.scroll-area');
   if (area) area.scrollTop = 0;
@@ -80,45 +55,46 @@ function showScreen(name) {
 // ══ INIT ══════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
 
+  // Карточки режимов на главной
   document.addEventListener('click', e => {
-  const card = e.target.closest('[data-mode]');
-  dbg('HANDLER card=' + (card ? card.dataset.mode : 'null') + 
-      ' inHome=' + (card ? !!card.closest('#screen-home') : 'n/a') +
-      ' screenHomeActive=' + document.getElementById('screen-home').classList.contains('active'));
-  if (card && card.closest('#screen-home')) {
-    dbg('BEFORE resetCamera');
-    try {
+    const card = e.target.closest('[data-mode]');
+    if (card && card.closest('#screen-home')) {
       currentMode = card.dataset.mode;
       resetCamera();
-      dbg('AFTER resetCamera');
-    } catch(err) {
-      dbg('ERROR resetCamera: ' + err.message);
-    }
-    try {
       showScreen('camera');
-      dbg('AFTER showScreen');
-    } catch(err) {
-      dbg('ERROR showScreen: ' + err.message);
     }
-  }
-});
-
-  document.getElementById('camera-card').addEventListener('click', () => {
-    document.getElementById('photo-input').click();
-  });
-  document.getElementById('photo-input').addEventListener('change', function() {
-    handlePhoto(this);
   });
 
+  // Клик по camera-card — делегированно, т.к. card пересоздаётся в resetCamera
+  document.addEventListener('click', e => {
+    if (e.target.closest('#camera-card') &&
+        document.getElementById('screen-camera').classList.contains('active')) {
+      document.getElementById('photo-input').click();
+    }
+  });
+
+  // Кнопки назад
   document.getElementById('btn-camera-back').addEventListener('click', () => showScreen('home'));
   document.getElementById('btn-result-back').addEventListener('click', () => showScreen('home'));
   document.getElementById('btn-error-back').addEventListener('click', () => showScreen('home'));
 
+  // Кнопки на экране ошибки
   document.getElementById('btn-retry').addEventListener('click', () => {
     resetCamera();
     showScreen('camera');
   });
   document.getElementById('btn-error-home').addEventListener('click', () => showScreen('home'));
+
+  // Кнопки результата — делегированно, т.к. создаются динамически в renderResult
+  document.addEventListener('click', e => {
+    if (e.target.id === 'result-retry-btn') {
+      resetCamera();
+      showScreen('camera');
+    }
+    if (e.target.id === 'result-home-btn') {
+      showScreen('home');
+    }
+  });
 
   const tg = window.MaxBridge;
   if (tg) {
@@ -139,28 +115,33 @@ document.addEventListener('DOMContentLoaded', () => {
 // ══ CAMERA RESET ══════════════════════════════════════════════
 function resetCamera() {
   const m = MODES[currentMode];
-  document.getElementById('camera-title').textContent     = m.label;
-  document.getElementById('camera-hint-text').textContent = m.hint;
-  document.getElementById('tip-card').innerHTML           = `<div class="tip-text">${m.tip}</div>`;
-  document.getElementById('camera-preview').innerHTML     = `
-    <div class="camera-placeholder">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-        <circle cx="12" cy="13" r="4"/>
-      </svg>
-      <span>${m.hint}</span>
-      <span class="camera-hint">Нажми чтобы открыть камеру</span>
-    </div>`;
 
-  const oldInput = document.getElementById('photo-input');
-  const newInput = document.createElement('input');
-  newInput.type = 'file';
-  newInput.id = 'photo-input';
-  newInput.accept = 'image/*';
-  newInput.setAttribute('capture', 'environment');
-  newInput.style.display = 'none';
-  newInput.addEventListener('change', function() { handlePhoto(this); });
-  oldInput.parentNode.replaceChild(newInput, oldInput);
+  // Заголовок экрана
+  document.getElementById('camera-title').textContent = m.label;
+
+  // Пересоздаём всё содержимое camera-card целиком —
+  // это устраняет баг с camera-hint-text (null после первого вызова)
+  document.getElementById('camera-card').innerHTML = `
+    <div class="camera-preview" id="camera-preview">
+      <div class="camera-placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        <span>${m.hint}</span>
+        <span class="camera-hint">Нажми чтобы открыть камеру</span>
+      </div>
+    </div>
+    <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none">
+  `;
+
+  // Вешаем listener на свежий input
+  document.getElementById('photo-input').addEventListener('change', function() {
+    handlePhoto(this);
+  });
+
+  // Подсказка под камерой
+  document.getElementById('tip-card').innerHTML = `<div class="tip-text">${m.tip}</div>`;
 }
 
 // ══ PHOTO HANDLER ═════════════════════════════════════════════
@@ -269,12 +250,8 @@ function renderResult(mode, r, wrongCategory) {
   html += `<div class="disclaimer">Результат носит информационный характер. При сомнениях не употребляйте в пищу.</div>`;
 
   document.getElementById('result-content').innerHTML = html;
-
-  document.getElementById('result-retry-btn').addEventListener('click', () => {
-    resetCamera();
-    showScreen('camera');
-  });
-  document.getElementById('result-home-btn').addEventListener('click', () => showScreen('home'));
+  // Listeners на result-retry-btn и result-home-btn вешаются делегированием
+  // через document в DOMContentLoaded — они не теряются при перерендере
 }
 
 function showError(title, text) {
