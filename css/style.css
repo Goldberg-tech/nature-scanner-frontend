@@ -52,14 +52,10 @@ input  { font-family: inherit; }
   flex-direction: column;
   flex: 1;
   overflow: hidden;
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  pointer-events: none;
 }
 .screen.active {
   display: flex !important;
   pointer-events: auto;
-  position: relative;
   animation: fadeIn .2s ease;
 }
 
