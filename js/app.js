@@ -81,13 +81,16 @@ function showScreen(name) {
 document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('click', e => {
-    const card = e.target.closest('[data-mode]');
-    if (card && card.closest('#screen-home')) {
-      currentMode = card.dataset.mode;
-      resetCamera();
-      showScreen('camera');
-    }
-  });
+  const card = e.target.closest('[data-mode]');
+  dbg('HANDLER card=' + (card ? card.dataset.mode : 'null') + 
+      ' inHome=' + (card ? !!card.closest('#screen-home') : 'n/a') +
+      ' screenHomeActive=' + document.getElementById('screen-home').classList.contains('active'));
+  if (card && card.closest('#screen-home')) {
+    currentMode = card.dataset.mode;
+    resetCamera();
+    showScreen('camera');
+  }
+});
 
   document.getElementById('camera-card').addEventListener('click', () => {
     document.getElementById('photo-input').click();
