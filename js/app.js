@@ -1,3 +1,26 @@
+function dbg(msg) {
+  const p = document.getElementById('debug-panel');
+  if (!p) return;
+  const line = document.createElement('div');
+  line.textContent = Date.now() % 100000 + ' ' + msg;
+  p.appendChild(line);
+  p.scrollTop = p.scrollHeight;
+}
+
+// Перехватываем все клики глобально
+document.addEventListener('click', e => {
+  dbg('CLICK tag=' + e.target.tagName + ' id=' + e.target.id + ' class=' + e.target.className);
+}, true); // true = capture phase, раньше всего
+
+// Перехватываем touchstart/touchend
+document.addEventListener('touchstart', e => {
+  dbg('TOUCHSTART tag=' + e.target.tagName + ' class=' + e.target.className.toString().slice(0,30));
+}, { passive: true, capture: true });
+
+document.addEventListener('touchend', e => {
+  dbg('TOUCHEND tag=' + e.target.tagName);
+}, { passive: true, capture: true });
+
 const API = 'https://nature-scanner-backend-production.up.railway.app';
 
 const MODES = {
