@@ -20,7 +20,7 @@ const MODES = {
 
 let currentMode = 'plant';
 
-// ══ FIX 1: Блокируем свайп вниз который сдвигает WebView ══════
+// ══ БЛОКИРОВКА СВАЙПА ВНИЗ ════════════════════════════════════
 let touchStartY = 0;
 document.addEventListener('touchstart', e => {
   touchStartY = e.touches[0].clientY;
@@ -31,25 +31,19 @@ document.addEventListener('touchmove', e => {
   if (scrollArea) {
     const movingDown = e.touches[0].clientY > touchStartY;
     if (scrollArea.scrollTop <= 0 && movingDown) {
-      e.preventDefault(); // блокируем pull-down внутри scroll-area когда в начале
+      e.preventDefault();
     }
   } else {
-    e.preventDefault(); // блокируем любой свайп вне scroll-area
+    e.preventDefault();
   }
 }, { passive: false });
 
-// ══ FIX 2: showScreen явно форсирует display ══════════════════
+// ══ NAVIGATION — простая, без лишних манипуляций ══════════════
 function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => {
-    s.classList.remove('active');
-    s.style.setProperty('display', 'none', 'important');
-    s.style.setProperty('pointer-events', 'none', 'important');
-  });
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const screen = document.getElementById('screen-' + name);
   if (!screen) return;
   screen.classList.add('active');
-  screen.style.setProperty('display', 'flex', 'important');
-  screen.style.setProperty('pointer-events', 'auto', 'important');
   const area = screen.querySelector('.scroll-area');
   if (area) area.scrollTop = 0;
 }
