@@ -2,16 +2,16 @@
    VARIABLES
 ══════════════════════════════════════════════════════════════ */
 :root {
-  --bg:      #1a3a8f;
-  --bg2:     #1e4099;
-  --bg3:     #162f7a;
-  --card:    #1e4099;
-  --border:  rgba(255,255,255,0.12);
-  --accent:  #4a9eff;
+  --bg:      #0d0d0f;
+  --bg2:     #141417;
+  --bg3:     #1c1c21;
+  --card:    #18181d;
+  --border:  rgba(255,255,255,0.07);
+  --accent:  #e8ff47;
   --accent2: #ff5c38;
   --green:   #3ddc84;
-  --text:    #ffffff;
-  --muted:   rgba(255,255,255,0.55);
+  --text:    #f0f0f0;
+  --muted:   #6b6b7a;
   --radius:  16px;
 }
 
@@ -130,11 +130,11 @@ input  { font-family: inherit; }
   transition: all .15s;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation; /* ← убирает задержку 300ms и конфликты touch/click */
+  touch-action: manipulation;
 }
 .mode-card:active {
-  background: rgba(74,158,255,0.2);
-  border-color: rgba(74,158,255,0.7);
+  background: rgba(232,255,71,0.08);
+  border-color: rgba(232,255,71,0.4);
   transform: scale(0.97);
 }
 .mode-emoji { font-size: 32px; line-height: 1; margin-bottom: 4px; }
@@ -142,20 +142,20 @@ input  { font-family: inherit; }
 .mode-hint  { font-size: 11px; color: var(--accent); font-weight: 600; }
 
 .mode-card-mystery {
-  border-color: rgba(74,158,255,0.6);
-  background: rgba(74,158,255,0.15);
+  border-color: rgba(232,255,71,0.25);
+  background: rgba(232,255,71,0.05);
 }
 .mode-card-mystery .mode-name { font-size: 13px; }
 
 /* ══ DISCLAIMER ═══════════════════════════════════════════════ */
 .disclaimer {
   font-size: 13px;
-  color: rgba(255,255,255,0.6);
+  color: var(--muted);
   line-height: 1.6;
   padding: 12px 14px;
-  background: rgba(0,0,0,0.15);;
+  background: var(--bg3);
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid var(--border);
   margin-top: 16px;
 }
 
@@ -182,7 +182,7 @@ input  { font-family: inherit; }
   color: var(--text);
   flex-shrink: 0;
   cursor: pointer;
-  touch-action: manipulation; /* ← фикс */
+  touch-action: manipulation;
 }
 
 /* ══ CAMERA ═══════════════════════════════════════════════════ */
@@ -193,7 +193,7 @@ input  { font-family: inherit; }
   margin-bottom: 20px;
   border: 2px dashed rgba(232,255,71,0.3);
   transition: border-color .2s;
-  touch-action: manipulation; /* ← фикс */
+  touch-action: manipulation;
 }
 .camera-card:active { border-color: var(--accent); }
 .camera-preview {
@@ -250,8 +250,8 @@ input  { font-family: inherit; }
   width: 100%;
   padding: 15px;
   border-radius: 14px;
-  background: #ffffff;
-  color: #1a3a8f;
+  background: var(--accent);
+  color: #0d0d0f;
   font-weight: 800;
   font-size: 15px;
   display: flex;
@@ -261,7 +261,7 @@ input  { font-family: inherit; }
   transition: opacity .2s;
   margin-bottom: 0;
   cursor: pointer;
-  touch-action: manipulation; /* ← фикс */
+  touch-action: manipulation;
 }
 .primary-btn:active { opacity: 0.85; }
 
@@ -279,7 +279,7 @@ input  { font-family: inherit; }
   justify-content: center;
   cursor: pointer;
   transition: all .2s;
-  touch-action: manipulation; /* ← фикс */
+  touch-action: manipulation;
 }
 .secondary-btn:active { background: var(--bg3); }
 
@@ -423,13 +423,13 @@ input  { font-family: inherit; }
   flex: 1; padding: 13px; border-radius: 12px;
   border: 1px solid var(--border); background: var(--bg3);
   color: var(--text); font-size: 14px; font-weight: 700; cursor: pointer;
-  touch-action: manipulation; /* ← фикс */
+  touch-action: manipulation;
 }
 .exit-btn-confirm {
   flex: 1; padding: 13px; border-radius: 12px;
   background: var(--accent2); color: #fff;
   font-size: 14px; font-weight: 700; cursor: pointer;
-  touch-action: manipulation; /* ← фикс */
+  touch-action: manipulation;
 }
 
 /* ══ TOAST ════════════════════════════════════════════════════ */
