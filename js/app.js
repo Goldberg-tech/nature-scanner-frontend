@@ -28,11 +28,16 @@ document.addEventListener('touchstart', e => {
 
 document.addEventListener('touchmove', e => {
   const scrollArea = e.target.closest('.scroll-area');
-  if (scrollArea) {
-    if (scrollArea.scrollTop <= 0 && e.touches[0].clientY > touchStartY) {
-      e.preventDefault();
-    }
-  } else {
+  if (!scrollArea) {
+    e.preventDefault();
+    return;
+  }
+  const atTop    = scrollArea.scrollTop <= 0;
+  const atBottom = scrollArea.scrollTop + scrollArea.clientHeight >= scrollArea.scrollHeight - 1;
+  const swipingDown = e.touches[0].clientY > touchStartY;
+  const swipingUp   = e.touches[0].clientY < touchStartY;
+
+  if ((atTop && swipingDown) || (atBottom && swipingUp)) {
     e.preventDefault();
   }
 }, { passive: false });
@@ -43,6 +48,8 @@ function showScreen(name) {
   const screen = document.getElementById('screen-' + name);
   if (!screen) return;
   screen.classList.add('active');
+  // сброс touch-состояния при смене экрана
+  touchStartY = 0;
   const area = screen.querySelector('.scroll-area');
   if (area) area.scrollTop = 0;
 }
@@ -50,7 +57,6 @@ function showScreen(name) {
 // ══ INIT ══════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
 
-  // FIX: вешаем на document и ищем ближайший [data-mode] через closest
   document.addEventListener('click', e => {
     const card = e.target.closest('[data-mode]');
     if (card && card.closest('#screen-home')) {
@@ -227,7 +233,6 @@ function renderResult(mode, r, wrongCategory) {
 
   document.getElementById('result-content').innerHTML = html;
 
-  // FIX: вешаем через document чтобы гарантированно поймать клик
   document.getElementById('result-retry-btn').addEventListener('click', () => {
     resetCamera();
     showScreen('camera');
