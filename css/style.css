@@ -2,9 +2,9 @@
    VARIABLES
 ══════════════════════════════════════════════════════════════ */
 :root {
-  --bg:      #eef2f8;
-  --bg2:     #f5f8fc;
-  --bg3:     #e2e8f2;
+  --bg:      #dce8f5;
+  --bg2:     #eef4fb;
+  --bg3:     #cfdcee;
   --card:    #ffffff;
   --border:  rgba(0,0,0,0.08);
   --accent:  #3b82f6;
@@ -133,8 +133,8 @@ input  { font-family: inherit; }
   touch-action: manipulation; /* ← убирает задержку 300ms и конфликты touch/click */
 }
 .mode-card:active {
-  background: rgba(232,255,71,0.08);
-  border-color: rgba(232,255,71,0.4);
+  background: rgba(59,130,246,0.08);
+  border-color: rgba(59,130,246,0.35);
   transform: scale(0.97);
 }
 .mode-emoji { font-size: 32px; line-height: 1; margin-bottom: 4px; }
@@ -142,20 +142,20 @@ input  { font-family: inherit; }
 .mode-hint  { font-size: 11px; color: var(--accent); font-weight: 600; }
 
 .mode-card-mystery {
-  border-color: rgba(232,255,71,0.25);
-  background: rgba(232,255,71,0.05);
+  border-color: rgba(59,130,246,0.25);
+  background: rgba(59,130,246,0.05);
 }
 .mode-card-mystery .mode-name { font-size: 13px; }
 
 /* ══ DISCLAIMER ═══════════════════════════════════════════════ */
 .disclaimer {
   font-size: 13px;
-  color: var(--muted);
+  color: #4a5568;
   line-height: 1.6;
   padding: 12px 14px;
-  background: var(--bg3);
+  background: var(--bg2);
   border-radius: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(59,130,246,0.2);
   margin-top: 16px;
 }
 
