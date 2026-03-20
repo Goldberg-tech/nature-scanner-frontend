@@ -29,8 +29,7 @@ document.addEventListener('touchstart', e => {
 document.addEventListener('touchmove', e => {
   const scrollArea = e.target.closest('.scroll-area');
   if (scrollArea) {
-    const movingDown = e.touches[0].clientY > touchStartY;
-    if (scrollArea.scrollTop <= 0 && movingDown) {
+    if (scrollArea.scrollTop <= 0 && e.touches[0].clientY > touchStartY) {
       e.preventDefault();
     }
   } else {
@@ -38,7 +37,7 @@ document.addEventListener('touchmove', e => {
   }
 }, { passive: false });
 
-// ══ NAVIGATION — простая, без лишних манипуляций ══════════════
+// ══ NAVIGATION ════════════════════════════════════════════════
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const screen = document.getElementById('screen-' + name);
@@ -51,12 +50,14 @@ function showScreen(name) {
 // ══ INIT ══════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
 
-  document.querySelectorAll('.mode-card[data-mode]').forEach(card => {
-    card.addEventListener('click', () => {
+  // FIX: вешаем на document и ищем ближайший [data-mode] через closest
+  document.addEventListener('click', e => {
+    const card = e.target.closest('[data-mode]');
+    if (card && card.closest('#screen-home')) {
       currentMode = card.dataset.mode;
       resetCamera();
       showScreen('camera');
-    });
+    }
   });
 
   document.getElementById('camera-card').addEventListener('click', () => {
@@ -82,8 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try { tg.expand(); } catch(e) {}
     try { if (typeof tg.requestFullscreen === 'function') tg.requestFullscreen(); } catch(e) {}
     try { if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes(); } catch(e) {}
-
-    const exitModal     = document.getElementById('exitModal');
+    const exitModal = document.getElementById('exitModal');
     const showExitModal = () => exitModal.classList.add('open');
     const hideExitModal = () => exitModal.classList.remove('open');
     tg.onEvent('close', showExitModal);
@@ -136,7 +136,6 @@ function handlePhoto(input) {
 async function scanPhoto(file) {
   document.getElementById('loading-text').textContent = MODES[currentMode].loading;
   showScreen('loading');
-
   try {
     const base64 = await fileToBase64(file);
     const res = await fetch(`${API}/scan`, {
@@ -145,21 +144,16 @@ async function scanPhoto(file) {
       body: JSON.stringify({ base64, mode: currentMode }),
     });
     const data = await res.json();
-
     if (!res.ok || data.error) {
       showError('Не удалось определить', data.error || 'Попробуй сделать более чёткое фото');
       return;
     }
-
     if (data.result && data.result.wrong_category) {
       renderResult(data.mode, data.result, data.result.wrong_category);
-      showScreen('result');
-      return;
+    } else {
+      renderResult(data.mode, data.result, null);
     }
-
-    renderResult(data.mode, data.result, null);
     showScreen('result');
-
   } catch (err) {
     showError('Ошибка соединения', 'Проверь интернет и попробуй снова');
   }
@@ -181,7 +175,6 @@ function renderResult(mode, r, wrongCategory) {
   if (wrongCategory) {
     html += `<div class="wrong-category-card"><div class="wrong-category-text">${wrongCategory}</div></div>`;
   }
-
   if (r.warning) {
     html += `<div class="warning-card"><div class="warning-icon">⚠️</div><div class="warning-text">${r.warning}</div></div>`;
   }
@@ -234,6 +227,7 @@ function renderResult(mode, r, wrongCategory) {
 
   document.getElementById('result-content').innerHTML = html;
 
+  // FIX: вешаем через document чтобы гарантированно поймать клик
   document.getElementById('result-retry-btn').addEventListener('click', () => {
     resetCamera();
     showScreen('camera');
@@ -241,14 +235,12 @@ function renderResult(mode, r, wrongCategory) {
   document.getElementById('result-home-btn').addEventListener('click', () => showScreen('home'));
 }
 
-// ══ ERROR ═════════════════════════════════════════════════════
 function showError(title, text) {
   document.getElementById('error-title').textContent = title;
   document.getElementById('error-text').textContent  = text;
   showScreen('error');
 }
 
-// ══ HELPERS ═══════════════════════════════════════════════════
 function getEdibleClass(e) {
   if (!e) return 'badge-warning';
   if (e === 'съедобный')           return 'badge-safe';
