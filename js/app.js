@@ -20,87 +20,68 @@ const MODES = {
 
 let currentMode = 'plant';
 
-// ══ DEBUG TOAST ═══════════════════════════════════════════════
-function dbg(msg) {
-  const t = document.getElementById('toast');
-  if (!t) return;
-  t.textContent = '🔍 ' + msg;
-  t.style.opacity = '1';
-  t.style.transform = 'translateX(-50%) translateY(0)';
-  clearTimeout(window._dbgTimer);
-  window._dbgTimer = setTimeout(() => {
-    t.style.opacity = '0';
-    t.style.transform = 'translateX(-50%) translateY(20px)';
-  }, 3000);
-}
+// ══ FIX 1: Блокируем свайп вниз который сдвигает WebView ══════
+let touchStartY = 0;
+document.addEventListener('touchstart', e => {
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
 
-// ══ NAVIGATION ════════════════════════════════════════════════
+document.addEventListener('touchmove', e => {
+  const scrollArea = e.target.closest('.scroll-area');
+  if (scrollArea) {
+    const movingDown = e.touches[0].clientY > touchStartY;
+    if (scrollArea.scrollTop <= 0 && movingDown) {
+      e.preventDefault(); // блокируем pull-down внутри scroll-area когда в начале
+    }
+  } else {
+    e.preventDefault(); // блокируем любой свайп вне scroll-area
+  }
+}, { passive: false });
+
+// ══ FIX 2: showScreen явно форсирует display ══════════════════
 function showScreen(name) {
-  dbg('showScreen: ' + name);
-  const all = document.querySelectorAll('.screen');
-  all.forEach(s => {
+  document.querySelectorAll('.screen').forEach(s => {
     s.classList.remove('active');
-    s.style.cssText = 'display:none!important;pointer-events:none!important;';
+    s.style.setProperty('display', 'none', 'important');
+    s.style.setProperty('pointer-events', 'none', 'important');
   });
   const screen = document.getElementById('screen-' + name);
-  if (!screen) { dbg('ERROR: no screen-' + name); return; }
-  screen.style.cssText = '';
+  if (!screen) return;
   screen.classList.add('active');
+  screen.style.setProperty('display', 'flex', 'important');
+  screen.style.setProperty('pointer-events', 'auto', 'important');
   const area = screen.querySelector('.scroll-area');
   if (area) area.scrollTop = 0;
-  dbg('OK: ' + name + ' active');
 }
 
 // ══ INIT ══════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-  dbg('DOMContentLoaded');
 
-  // Карточки режимов
   document.querySelectorAll('.mode-card[data-mode]').forEach(card => {
     card.addEventListener('click', () => {
-      dbg('mode click: ' + card.dataset.mode);
       currentMode = card.dataset.mode;
       resetCamera();
       showScreen('camera');
     });
   });
 
-  // Камера
   document.getElementById('camera-card').addEventListener('click', () => {
-    dbg('camera-card click');
     document.getElementById('photo-input').click();
   });
-
   document.getElementById('photo-input').addEventListener('change', function() {
     handlePhoto(this);
   });
 
-  // Кнопки назад
-  document.getElementById('btn-camera-back').addEventListener('click', () => {
-    dbg('camera back');
-    showScreen('home');
-  });
-  document.getElementById('btn-result-back').addEventListener('click', () => {
-    dbg('result back');
-    showScreen('home');
-  });
-  document.getElementById('btn-error-back').addEventListener('click', () => {
-    dbg('error back');
-    showScreen('home');
-  });
+  document.getElementById('btn-camera-back').addEventListener('click', () => showScreen('home'));
+  document.getElementById('btn-result-back').addEventListener('click', () => showScreen('home'));
+  document.getElementById('btn-error-back').addEventListener('click', () => showScreen('home'));
 
-  // Кнопки ошибки
   document.getElementById('btn-retry').addEventListener('click', () => {
-    dbg('retry click');
     resetCamera();
     showScreen('camera');
   });
-  document.getElementById('btn-error-home').addEventListener('click', () => {
-    dbg('error-home click');
-    showScreen('home');
-  });
+  document.getElementById('btn-error-home').addEventListener('click', () => showScreen('home'));
 
-  // Max Bridge
   const tg = window.MaxBridge;
   if (tg) {
     try { tg.ready(); } catch(e) {}
@@ -260,14 +241,10 @@ function renderResult(mode, r, wrongCategory) {
   document.getElementById('result-content').innerHTML = html;
 
   document.getElementById('result-retry-btn').addEventListener('click', () => {
-    dbg('result-retry click');
     resetCamera();
     showScreen('camera');
   });
-  document.getElementById('result-home-btn').addEventListener('click', () => {
-    dbg('result-home click');
-    showScreen('home');
-  });
+  document.getElementById('result-home-btn').addEventListener('click', () => showScreen('home'));
 }
 
 // ══ ERROR ═════════════════════════════════════════════════════
