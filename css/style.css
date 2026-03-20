@@ -31,7 +31,6 @@ html, body {
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
-  /* убираем touch-action с body — он блокирует тапы после скролла в Max */
 }
 
 button { font-family: inherit; cursor: pointer; border: none; outline: none; background: none; }
@@ -131,6 +130,7 @@ input  { font-family: inherit; }
   transition: all .15s;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; /* ← убирает задержку 300ms и конфликты touch/click */
 }
 .mode-card:active {
   background: rgba(232,255,71,0.08);
@@ -182,6 +182,7 @@ input  { font-family: inherit; }
   color: var(--text);
   flex-shrink: 0;
   cursor: pointer;
+  touch-action: manipulation; /* ← фикс */
 }
 
 /* ══ CAMERA ═══════════════════════════════════════════════════ */
@@ -192,6 +193,7 @@ input  { font-family: inherit; }
   margin-bottom: 20px;
   border: 2px dashed rgba(232,255,71,0.3);
   transition: border-color .2s;
+  touch-action: manipulation; /* ← фикс */
 }
 .camera-card:active { border-color: var(--accent); }
 .camera-preview {
@@ -259,6 +261,7 @@ input  { font-family: inherit; }
   transition: opacity .2s;
   margin-bottom: 0;
   cursor: pointer;
+  touch-action: manipulation; /* ← фикс */
 }
 .primary-btn:active { opacity: 0.85; }
 
@@ -276,6 +279,7 @@ input  { font-family: inherit; }
   justify-content: center;
   cursor: pointer;
   transition: all .2s;
+  touch-action: manipulation; /* ← фикс */
 }
 .secondary-btn:active { background: var(--bg3); }
 
@@ -419,11 +423,13 @@ input  { font-family: inherit; }
   flex: 1; padding: 13px; border-radius: 12px;
   border: 1px solid var(--border); background: var(--bg3);
   color: var(--text); font-size: 14px; font-weight: 700; cursor: pointer;
+  touch-action: manipulation; /* ← фикс */
 }
 .exit-btn-confirm {
   flex: 1; padding: 13px; border-radius: 12px;
   background: var(--accent2); color: #fff;
   font-size: 14px; font-weight: 700; cursor: pointer;
+  touch-action: manipulation; /* ← фикс */
 }
 
 /* ══ TOAST ════════════════════════════════════════════════════ */
