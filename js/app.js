@@ -86,9 +86,20 @@ document.addEventListener('DOMContentLoaded', () => {
       ' inHome=' + (card ? !!card.closest('#screen-home') : 'n/a') +
       ' screenHomeActive=' + document.getElementById('screen-home').classList.contains('active'));
   if (card && card.closest('#screen-home')) {
-    currentMode = card.dataset.mode;
-    resetCamera();
-    showScreen('camera');
+    dbg('BEFORE resetCamera');
+    try {
+      currentMode = card.dataset.mode;
+      resetCamera();
+      dbg('AFTER resetCamera');
+    } catch(err) {
+      dbg('ERROR resetCamera: ' + err.message);
+    }
+    try {
+      showScreen('camera');
+      dbg('AFTER showScreen');
+    } catch(err) {
+      dbg('ERROR showScreen: ' + err.message);
+    }
   }
 });
 
