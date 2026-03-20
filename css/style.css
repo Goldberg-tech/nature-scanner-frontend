@@ -2,16 +2,16 @@
    VARIABLES
 ══════════════════════════════════════════════════════════════ */
 :root {
-  --bg:      #0d0d0f;
-  --bg2:     #141417;
-  --bg3:     #1c1c21;
-  --card:    #18181d;
-  --border:  rgba(255,255,255,0.07);
-  --accent:  #0088FF;
+  --bg:      #eef2f8;
+  --bg2:     #f5f8fc;
+  --bg3:     #e2e8f2;
+  --card:    #ffffff;
+  --border:  rgba(0,0,0,0.08);
+  --accent:  #3b82f6;
   --accent2: #ff5c38;
   --green:   #3ddc84;
-  --text:    #f0f0f0;
-  --muted:   #6b6b7a;
+  --text:    #1a1d2e;
+  --muted:   #7a82a0;
   --radius:  16px;
 }
 
