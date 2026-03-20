@@ -119,8 +119,7 @@ function resetCamera() {
   // Заголовок экрана
   document.getElementById('camera-title').textContent = m.label;
 
-  // Пересоздаём всё содержимое camera-card целиком —
-  // это устраняет баг с camera-hint-text (null после первого вызова)
+  // Пересоздаём всё содержимое camera-card целиком
   document.getElementById('camera-card').innerHTML = `
     <div class="camera-preview" id="camera-preview">
       <div class="camera-placeholder">
@@ -162,10 +161,12 @@ async function scanPhoto(file) {
   showScreen('loading');
   try {
     const base64 = await fileToBase64(file);
+    const user = window.WebApp?.initDataUnsafe?.user;
+    const userId = user?.id || null;
     const res = await fetch(`${API}/scan`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ base64, mode: currentMode }),
+      body: JSON.stringify({ base64, mode: currentMode, user_id: userId }),
     });
     const data = await res.json();
     if (!res.ok || data.error) {
