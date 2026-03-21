@@ -171,8 +171,9 @@ async function scanPhoto(file) {
   showScreen('loading');
   try {
     const base64 = await fileToBase64(file);
-    const user = window.WebApp?.initDataUnsafe?.user;
-    const userId = user?.id || null;
+    const user = window.WebApp?.initDataUnsafe?.user
+          || window.MaxBridge?.initDataUnsafe?.user;
+const userId = user?.id || user?.user_id || null;
     const res = await fetch(`${API}/scan`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
