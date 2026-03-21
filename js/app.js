@@ -1,21 +1,21 @@
 const API = 'https://nature-scanner-backend-production.up.railway.app';
 
 const MODES = {
-  plant:     { label:'Растение',          hint:'Сфотографировать растение',        tip:'Снимай листья, стебель и цветы крупным планом.',               loading:'Определяем растение...' },
-  mushroom:  { label:'Гриб',              hint:'Сфотографировать гриб',             tip:'Снимай шляпку сверху и снизу, а также ножку.',                 loading:'Определяем гриб...' },
-  tree:      { label:'Дерево',            hint:'Сфотографировать дерево',           tip:'Снимай листья, кору и форму кроны.',                           loading:'Определяем дерево...' },
-  berry:     { label:'Ягода',             hint:'Сфотографировать ягоду',            tip:'Сними ягоды крупным планом с листьями.',                       loading:'Определяем ягоду...' },
-  weed:      { label:'Сорняк',            hint:'Сфотографировать сорняк',           tip:'Снимай растение целиком с корнем.',                            loading:'Определяем сорняк...' },
-  disease:   { label:'Болезнь растения',  hint:'Сфотографировать поражённый лист',  tip:'Снимай крупным планом поражённый участок.',                    loading:'Анализируем болезнь...' },
-  seed:      { label:'Семена',            hint:'Сфотографировать семена',           tip:'Положи семена на светлую поверхность.',                        loading:'Определяем семена...' },
-  vegetable: { label:'Овощ',              hint:'Сфотографировать овощ',             tip:'Сними овощ целиком на нейтральном фоне.',                      loading:'Определяем овощ...' },
-  fruit:     { label:'Фрукт',             hint:'Сфотографировать фрукт',            tip:'Сними фрукт целиком с черешком.',                              loading:'Определяем фрукт...' },
-  bird:      { label:'Птица',             hint:'Сфотографировать птицу',            tip:'Снимай как можно ближе и чётче.',                              loading:'Определяем птицу...' },
-  insect:    { label:'Насекомое',         hint:'Сфотографировать насекомое',        tip:'Снимай крупным планом крылья и тело.',                         loading:'Определяем насекомое...' },
-  animal:    { label:'Животное',          hint:'Сфотографировать животное',         tip:'Снимай чётко, видны должны быть морда и окрас.',               loading:'Определяем животное...' },
-  track:     { label:'Следы',             hint:'Сфотографировать следы',            tip:'Клади рядом монету для масштаба.',                             loading:'Определяем следы...' },
-  rock:      { label:'Камень',            hint:'Сфотографировать камень',           tip:'Сними при хорошем освещении со скола.',                        loading:'Определяем камень...' },
-  mystery:   { label:'Что это?',          hint:'Сфотографировать непонятный объект',tip:'Сними как можно чётче.',                                      loading:'Разбираемся что это...' },
+  plant:     { label:'Растение',          hint:'Сфотографировать растение',        tip:'Снимайте листья, стебель и цветы крупным планом.',               loading:'Определяем растение...' },
+  mushroom:  { label:'Гриб',              hint:'Сфотографировать гриб',             tip:'Снимайте шляпку сверху и снизу, а также ножку.',                 loading:'Определяем гриб...' },
+  tree:      { label:'Дерево',            hint:'Сфотографировать дерево',           tip:'Снимайте листья, кору и форму кроны.',                           loading:'Определяем дерево...' },
+  berry:     { label:'Ягода',             hint:'Сфотографировать ягоду',            tip:'Снимите ягоды крупным планом с листьями.',                       loading:'Определяем ягоду...' },
+  weed:      { label:'Сорняк',            hint:'Сфотографировать сорняк',           tip:'Снимайте растение целиком с корнем.',                            loading:'Определяем сорняк...' },
+  disease:   { label:'Болезнь растения',  hint:'Сфотографировать поражённый лист',  tip:'Снимайте крупным планом поражённый участок.',                    loading:'Анализируем болезнь...' },
+  seed:      { label:'Семена',            hint:'Сфотографировать семена',           tip:'Положите семена на светлую поверхность.',                        loading:'Определяем семена...' },
+  vegetable: { label:'Овощ',              hint:'Сфотографировать овощ',             tip:'Снимите овощ целиком на нейтральном фоне.',                      loading:'Определяем овощ...' },
+  fruit:     { label:'Фрукт',             hint:'Сфотографировать фрукт',            tip:'Снимите фрукт целиком с черешком.',                              loading:'Определяем фрукт...' },
+  bird:      { label:'Птица',             hint:'Сфотографировать птицу',            tip:'Снимайте как можно ближе и чётче.',                              loading:'Определяем птицу...' },
+  insect:    { label:'Насекомое',         hint:'Сфотографировать насекомое',        tip:'Снимайте крупным планом крылья и тело.',                         loading:'Определяем насекомое...' },
+  animal:    { label:'Животное',          hint:'Сфотографировать животное',         tip:'Снимайте чётко, видны должны быть морда и окрас.',               loading:'Определяем животное...' },
+  track:     { label:'Следы',             hint:'Сфотографировать следы',            tip:'Кладите рядом монету для масштаба.',                             loading:'Определяем следы...' },
+  rock:      { label:'Камень',            hint:'Сфотографировать камень',           tip:'Снимите при хорошем освещении со скола.',                        loading:'Определяем камень...' },
+  mystery:   { label:'Что это?',          hint:'Сфотографировать непонятный объект',tip:'Снимите как можно чётче.',                                      loading:'Разбираемся что это...' },
 };
 
 let currentMode = 'plant';
@@ -52,14 +52,28 @@ function showScreen(name) {
   if (area) area.scrollTop = 0;
 }
 
+// ══ METRIKA HELPER ════════════════════════════════════════════
+function ymGoal(goal, params) {
+  try {
+    if (typeof ym !== 'undefined') {
+      ym(108179003, 'reachGoal', goal, params || {});
+    }
+  } catch(e) {}
+}
+
 // ══ INIT ══════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+
+  // Цель: открытие приложения
+  ymGoal('app_open');
 
   // Карточки режимов на главной
   document.addEventListener('click', e => {
     const card = e.target.closest('[data-mode]');
     if (card && card.closest('#screen-home')) {
       currentMode = card.dataset.mode;
+      // Цель: выбор категории
+      ymGoal('category_select', { category: currentMode });
       resetCamera();
       showScreen('camera');
     }
@@ -116,10 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function resetCamera() {
   const m = MODES[currentMode];
 
-  // Заголовок экрана
   document.getElementById('camera-title').textContent = m.label;
 
-  // Пересоздаём всё содержимое camera-card целиком
   document.getElementById('camera-card').innerHTML = `
     <div class="camera-preview" id="camera-preview">
       <div class="camera-placeholder">
@@ -134,12 +146,10 @@ function resetCamera() {
     <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none">
   `;
 
-  // Вешаем listener на свежий input
   document.getElementById('photo-input').addEventListener('change', function() {
     handlePhoto(this);
   });
 
-  // Подсказка под камерой
   document.getElementById('tip-card').innerHTML = `<div class="tip-text">${m.tip}</div>`;
 }
 
@@ -170,6 +180,8 @@ async function scanPhoto(file) {
     });
     const data = await res.json();
     if (!res.ok || data.error) {
+      // Цель: ошибка сканирования
+      ymGoal('scan_error', { mode: currentMode });
       showError('Не удалось определить', data.error || 'Попробуй сделать более чёткое фото');
       return;
     }
@@ -178,8 +190,11 @@ async function scanPhoto(file) {
     } else {
       renderResult(data.mode, data.result, null);
     }
+    // Цель: успешное сканирование
+    ymGoal('scan_complete', { mode: currentMode });
     showScreen('result');
   } catch (err) {
+    ymGoal('scan_error', { mode: currentMode });
     showError('Ошибка соединения', 'Проверь интернет и попробуй снова');
   }
 }
@@ -251,8 +266,6 @@ function renderResult(mode, r, wrongCategory) {
   html += `<div class="disclaimer">Результат носит информационный характер. При сомнениях не употребляйте в пищу.</div>`;
 
   document.getElementById('result-content').innerHTML = html;
-  // Listeners на result-retry-btn и result-home-btn вешаются делегированием
-  // через document в DOMContentLoaded — они не теряются при перерендере
 }
 
 function showError(title, text) {
